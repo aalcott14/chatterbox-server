@@ -59,7 +59,9 @@ describe('Node Server Request Listener Function', function() {
   it('Should accept posts to /classes/room', function() {
     var stubMsg = {
       username: 'Jono',
-      message: 'Do my bidding!'
+      message: 'Do my bidding!',
+      objectId: 1,
+      createdAt: 1
     };
     var req = new stubs.request('/classes/messages', 'POST', stubMsg);
     var res = new stubs.response();
@@ -78,7 +80,9 @@ describe('Node Server Request Listener Function', function() {
   it('Should respond with messages that were previously posted', function() {
     var stubMsg = {
       username: 'Jono',
-      message: 'Do my bidding!'
+      message: 'Do my bidding!',
+      objectId: 2,
+      createdAt: 2
     };
     var req = new stubs.request('/classes/messages', 'POST', stubMsg);
     var res = new stubs.response();
@@ -114,6 +118,78 @@ describe('Node Server Request Listener Function', function() {
       function() {
         expect(res._responseCode).to.equal(404);
       });
+  });
+
+  it('Should handle an OPTIONS request', function() {
+    var req = new stubs.request('/classes/messages', 'OPTIONS');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    // Expect 200 Created response status
+    expect(res._responseCode).to.equal(200);
+  });
+
+
+
+  it('Should handle query string request', function() {
+    var stubMsg = {
+      username: 'Jono',
+      message: 'Do my bidding!',
+      objectId: 3,
+      createdAt: 3
+    };
+    var stubMsg2 = {
+      username: 'TIMMI',
+      message: 'NEVER!',
+      objectId: 4,
+      createdAt: 4
+    };
+    var req1 = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var res1 = new stubs.response();
+    var req2 = new stubs.request('/classes/messages', 'POST', stubMsg2);
+    var res2 = new stubs.response();
+
+    handler.requestHandler(req1, res1);
+    handler.requestHandler(req2, res2);
+
+    expect(res1._responseCode).to.equal(201);
+    expect(res2._responseCode).to.equal(201);
+
+      // Now if we request the log for that room the message we posted should be there:
+    var req = new stubs.request('/classes/messages?order=-createdAt', 'GET');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data).results;
+    expect(messages.length).to.be.above(0);
+    expect(messages[0].username).to.equal('TIMMI');
+    expect(messages[0].message).to.equal('NEVER!');
+    expect(res._ended).to.equal(true);
+     
+
+    // add TIMMI
+    // var req2 = new stubs.request('/classes/messages', 'POST', stubMsg2);
+    // var res2 = new stubs.response();
+
+    // handler.requestHandler(req2, res2);
+
+    // expect(res2._responseCode).to.equal(201);
+
+    //   // Now if we request the log for that room the message we posted should be there:
+    // req2 = new stubs.request('/classes/messages', 'GET');
+    // res2 = new stubs.response();
+
+    // handler.requestHandler(req2, res2);
+
+    // expect(res2._responseCode).to.equal(200);
+    // var messages = JSON.parse(res1._data).results;
+    // expect(messages.length).to.be.above(0);
+    // expect(messages[1].username).to.equal('TIMMI');
+    // expect(messages[1].message).to.equal('NEVER!');
+    // expect(res2._ended).to.equal(true);
   });
 
 });

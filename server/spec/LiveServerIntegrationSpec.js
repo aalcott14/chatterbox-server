@@ -1,5 +1,6 @@
 var request = require('request');
 var expect = require('chai').expect;
+// done() is ensuring that one test finishes before another test starts. it ensures that the cb called after a successful GET request is done before continuing.
 
 describe('live-server', function() {
   it('should respond to GET requests for /classes/messages with a 200 status code', function(done) {
@@ -52,7 +53,8 @@ describe('live-server', function() {
       uri: 'http://127.0.0.1:3000/classes/messages',
       json: {
         username: 'Jono',
-        message: 'Do my bidding!'}
+        message: 'Do my bidding!'
+      }
     };
 
     request(requestParams, function(error, response, body) {
@@ -73,5 +75,58 @@ describe('live-server', function() {
     });
   });
 
+  it('Should handle an OPTIONS request', function(done) {
+    var requestParams = {method: 'OPTIONS',
+      uri: 'http://127.0.0.1:3000/classes/messages'
+    };
+    request(requestParams, function(error, response, body) {
+      expect(response.statusCode).to.equal(200);
+      done();
+    });
+  });
+
+  it('Should handle query string request', function(done) {
+    var requestParams = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        username: 'Jono',
+        message: 'Do my bidding!',
+        objectId: 1,
+        createdAt: 1
+      }
+    };
+
+    var requestParams2 = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        username: 'TIMMI',
+        message: 'NEVER!',
+        objectId: 2,
+        createdAt: 2
+      }
+    };
+    
+    request(requestParams, function(error, response, body) {
+      // Now if we request the log, that message we posted should be there:
+      request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+        var messages = JSON.parse(body).results;
+        expect(messages[0].username).to.equal('Jono');
+        expect(messages[0].message).to.equal('Do my bidding!');
+        done();
+      });
+    });
+     
+
+    // add TIMMI
+    request(requestParams2, function(error, response, body) {
+      // Now if we request the log, that message we posted should be there:
+      request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+        var messages = JSON.parse(body).results;
+        expect(messages[0].username).to.equal('TIMMI');
+        expect(messages[0].message).to.equal('NEVER!');
+        done();
+      });
+    });
+  });
 
 });

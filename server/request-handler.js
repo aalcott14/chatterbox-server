@@ -11,6 +11,9 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
+var fs = require('fs');
+var qs = require('querystring');
+var url = require('url');
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
@@ -28,16 +31,14 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
-var serverData = [{
-  objectId: 'SDGNOA',
-  username: 'tim',
-  text: 'Hi, Im Tim',
-  roomname: 'hackreactor',
-  createdAt: new Date()
-}];
-var fs = require('fs');
-var qs = require('querystring');
-var url = require('url');
+// var serverData = [{
+//   objectId: 'SDGNOA',
+//   username: 'tim',
+//   text: 'Hi, Im Tim',
+//   roomname: 'hackreactor',
+//   createdAt: Date.now()
+// }];
+var serverData = [];
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -56,9 +57,7 @@ var requestHandler = function(request, response) {
   // console.logs in your code.
   console.log('----------->Serving request type ' + request.method + ' for url ' + request.url);
   var pathName = url.parse(request.url).pathname;
-  console.log('************', pathName);
   var query = url.parse(request.url).query;
-  console.log('**********', query);
   
   // The outgoing status.
   var statusCode;
@@ -70,18 +69,30 @@ var requestHandler = function(request, response) {
     statusCode = 404;
   } else if (request.method === 'OPTIONS') {
     statusCode = 200;
-    headers['OPTIONS'] = 'Allow'; 
+    headers['OPTIONS'] = 'GET, POST, PUT, DELETE, OPTIONS'; 
+
   } else if (request.method === 'GET') {
     statusCode = 200;
-    console.log('In GET block');
-    console.log(serverData);
+    console.log('IN GET REQUEST');
+    if (query !== null) {
+      var objectQuery = qs.parse(query);
+      serverData.sort(function(a, b) {
+        if (objectQuery.order.charAt(0) === '-') {
+          return b.createdAt - a.createdAt;
+        } else {
+          return a.createdAt - b.createdAt;
+        }
+      });
+    }
+    // headers['Content-Type'] = 'application/json';
+    // response.writeHead(statusCode, headers);
+    // response.end(JSON.stringify({results: serverData}));
   } else if (request.method === 'POST') {
     statusCode = 201;
     body = '';
     request.on('data', function(data) {
       body += data;
       serverData.push(JSON.parse(body));
-      console.log(serverData);
     });
     request.on('end', function() {
       body = JSON.stringify({results: serverData});

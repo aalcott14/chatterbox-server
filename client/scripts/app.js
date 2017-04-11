@@ -1,4 +1,5 @@
 
+
 var app = {
 
   //TODO: The current 'handleUsernameClick' function just toggles the class 'friend'
@@ -64,6 +65,8 @@ var app = {
       contentType: 'application/json',
       success: function(data) {
         console.log('YAY!');
+        app.renderRoomList(data.results);
+        
         // Don't bother if we have nothing to work with
         if (!data.results || !data.results.length) { return; }
 
@@ -72,12 +75,13 @@ var app = {
         console.log(data.results);
 
         // Get the last message
-        var mostRecentMessage = data.results[data.results.length - 1];
+        var mostRecentMessage = data.results[0];
 
         // Only bother updating the DOM if we have a new message
         if (mostRecentMessage.objectId !== app.lastMessageId) {
           // Update the UI with the fetched rooms
           app.renderRoomList(data.results);
+          console.log('data.results: ', data.results);
 
           // Update the UI with the fetched messages
           app.renderMessages(data.results, animate);
@@ -167,7 +171,7 @@ var app = {
     $message.text(message.text).appendTo($chat);
 
     // Add the message to the UI
-    app.$chats.prepend($chat);
+    app.$chats.append($chat);
 
   },
 
@@ -228,12 +232,13 @@ var app = {
         return hash;
       }
     };
+    console.log("in handle submit: ", app.roomname);
     var message = {
       objectId: helper.hash(app.$message.val()),
       username: app.username,
       text: app.$message.val(),
-      roomname: app.roomname || 'lobby',
-      createdAt: new Date()
+      roomname: app.roomname, //|| 'lobby',
+      createdAt: Date.now()
     };
 
     app.send(message);
