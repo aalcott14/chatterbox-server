@@ -167,7 +167,7 @@ var app = {
     $message.text(message.text).appendTo($chat);
 
     // Add the message to the UI
-    app.$chats.append($chat);
+    app.$chats.prepend($chat);
 
   },
 
@@ -232,7 +232,8 @@ var app = {
       objectId: helper.hash(app.$message.val()),
       username: app.username,
       text: app.$message.val(),
-      roomname: app.roomname || 'lobby'
+      roomname: app.roomname || 'lobby',
+      createdAt: new Date()
     };
 
     app.send(message);

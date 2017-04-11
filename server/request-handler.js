@@ -32,7 +32,8 @@ var serverData = [{
   objectId: 'SDGNOA',
   username: 'tim',
   text: 'Hi, Im Tim',
-  roomname: 'hackreactor'
+  roomname: 'hackreactor',
+  createdAt: new Date()
 }];
 var fs = require('fs');
 var qs = require('querystring');
