@@ -39,7 +39,11 @@ describe('live-server', function() {
       uri: 'http://127.0.0.1:3000/classes/messages',
       json: {
         username: 'Jono',
-        message: 'Do my bidding!'}
+        text: 'Do my bidding!',
+        roomname: 'lobby',
+        objectId: 1,
+        createdAt: 1
+      }
     };
 
     request(requestParams, function(error, response, body) {
@@ -53,7 +57,10 @@ describe('live-server', function() {
       uri: 'http://127.0.0.1:3000/classes/messages',
       json: {
         username: 'Jono',
-        message: 'Do my bidding!'
+        text: 'Do my bidding!',
+        roomname: 'lobby',
+        objectId: 1,
+        createdAt: 1
       }
     };
 
@@ -62,7 +69,7 @@ describe('live-server', function() {
       request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
         var messages = JSON.parse(body).results;
         expect(messages[0].username).to.equal('Jono');
-        expect(messages[0].message).to.equal('Do my bidding!');
+        expect(messages[0].text).to.equal('Do my bidding!');
         done();
       });
     });
@@ -90,7 +97,8 @@ describe('live-server', function() {
       uri: 'http://127.0.0.1:3000/classes/messages',
       json: {
         username: 'Jono',
-        message: 'Do my bidding!',
+        text: 'Do my bidding!',
+        roomname: 'lobby',
         objectId: 1,
         createdAt: 1
       }
@@ -100,7 +108,8 @@ describe('live-server', function() {
       uri: 'http://127.0.0.1:3000/classes/messages',
       json: {
         username: 'TIMMI',
-        message: 'NEVER!',
+        text: 'NEVER!',
+        roomname: 'lobby',
         objectId: 2,
         createdAt: 2
       }
@@ -111,7 +120,7 @@ describe('live-server', function() {
       request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
         var messages = JSON.parse(body).results;
         expect(messages[0].username).to.equal('Jono');
-        expect(messages[0].message).to.equal('Do my bidding!');
+        expect(messages[0].text).to.equal('Do my bidding!');
         done();
       });
     });
@@ -123,7 +132,7 @@ describe('live-server', function() {
       request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
         var messages = JSON.parse(body).results;
         expect(messages[0].username).to.equal('TIMMI');
-        expect(messages[0].message).to.equal('NEVER!');
+        expect(messages[0].text).to.equal('NEVER!');
         done();
       });
     });

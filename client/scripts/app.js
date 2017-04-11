@@ -47,7 +47,6 @@ var app = {
       success: function (data) {
         // Clear messages input
         app.$message.val('');
-        console.log('Sending something');
         // Trigger a fetch to update the messages, pass true to animate
         app.fetch(true);
       },
@@ -64,15 +63,13 @@ var app = {
       data: { order: '-createdAt' },
       contentType: 'application/json',
       success: function(data) {
-        console.log('YAY!');
         app.renderRoomList(data.results);
-        
+
         // Don't bother if we have nothing to work with
         if (!data.results || !data.results.length) { return; }
 
         // Store messages for caching later
         app.messages = data.results;
-        console.log(data.results);
 
         // Get the last message
         var mostRecentMessage = data.results[0];
@@ -81,7 +78,6 @@ var app = {
         if (mostRecentMessage.objectId !== app.lastMessageId) {
           // Update the UI with the fetched rooms
           app.renderRoomList(data.results);
-          console.log('data.results: ', data.results);
 
           // Update the UI with the fetched messages
           app.renderMessages(data.results, animate);
@@ -232,7 +228,6 @@ var app = {
         return hash;
       }
     };
-    console.log("in handle submit: ", app.roomname);
     var message = {
       objectId: helper.hash(app.$message.val()),
       username: app.username,

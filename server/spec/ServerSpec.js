@@ -12,8 +12,6 @@ var waitForThen = function (test, cb) {
 
 describe('Node Server Request Listener Function', function() {
   it('Should answer GET requests for /classes/messages with a 200 status code', function() {
-    // This is a fake server request. Normally, the server would provide this,
-    // but we want to test our function's behavior totally independent of the server code
     var req = new stubs.request('/classes/messages', 'GET');
     var res = new stubs.response();
 
@@ -56,10 +54,11 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
-  it('Should accept posts to /classes/room', function() {
+  it('Should accept posts to /classes/messages', function() {
     var stubMsg = {
       username: 'Jono',
-      message: 'Do my bidding!',
+      text: 'Do my bidding!',
+      roomname: 'lobby',
       objectId: 1,
       createdAt: 1
     };
@@ -67,20 +66,15 @@ describe('Node Server Request Listener Function', function() {
     var res = new stubs.response();
 
     handler.requestHandler(req, res);
-
-    // Expect 201 Created response status
     expect(res._responseCode).to.equal(201);
-
-    // Testing for a newline isn't a valid test
-    // TODO: Replace with with a valid test
-    // expect(res._data).to.equal(JSON.stringify('\n'));
     expect(res._ended).to.equal(true);
   });
 
   it('Should respond with messages that were previously posted', function() {
     var stubMsg = {
       username: 'Jono',
-      message: 'Do my bidding!',
+      text: 'Do my bidding!',
+      roomname: 'lobby',
       objectId: 2,
       createdAt: 2
     };
@@ -91,7 +85,6 @@ describe('Node Server Request Listener Function', function() {
 
     expect(res._responseCode).to.equal(201);
 
-      // Now if we request the log for that room the message we posted should be there:
     req = new stubs.request('/classes/messages', 'GET');
     res = new stubs.response();
 
@@ -101,7 +94,7 @@ describe('Node Server Request Listener Function', function() {
     var messages = JSON.parse(res._data).results;
     expect(messages.length).to.be.above(0);
     expect(messages[0].username).to.equal('Jono');
-    expect(messages[0].message).to.equal('Do my bidding!');
+    expect(messages[0].text).to.equal('Do my bidding!');
     expect(res._ended).to.equal(true);
   });
 
@@ -112,7 +105,6 @@ describe('Node Server Request Listener Function', function() {
 
     handler.requestHandler(req, res);
 
-    // Wait for response to return and then check status code
     waitForThen(
       function() { return res._ended; },
       function() {
@@ -126,7 +118,6 @@ describe('Node Server Request Listener Function', function() {
 
     handler.requestHandler(req, res);
 
-    // Expect 200 Created response status
     expect(res._responseCode).to.equal(200);
   });
 
@@ -135,13 +126,15 @@ describe('Node Server Request Listener Function', function() {
   it('Should handle query string request', function() {
     var stubMsg = {
       username: 'Jono',
-      message: 'Do my bidding!',
+      text: 'Do my bidding!',
+      roomname: 'lobby',
       objectId: 3,
       createdAt: 3
     };
     var stubMsg2 = {
       username: 'TIMMI',
-      message: 'NEVER!',
+      text: 'NEVER!',
+      roomname: 'lobby',
       objectId: 4,
       createdAt: 4
     };
@@ -156,7 +149,6 @@ describe('Node Server Request Listener Function', function() {
     expect(res1._responseCode).to.equal(201);
     expect(res2._responseCode).to.equal(201);
 
-      // Now if we request the log for that room the message we posted should be there:
     var req = new stubs.request('/classes/messages?order=-createdAt', 'GET');
     var res = new stubs.response();
 
@@ -166,30 +158,8 @@ describe('Node Server Request Listener Function', function() {
     var messages = JSON.parse(res._data).results;
     expect(messages.length).to.be.above(0);
     expect(messages[0].username).to.equal('TIMMI');
-    expect(messages[0].message).to.equal('NEVER!');
+    expect(messages[0].text).to.equal('NEVER!');
     expect(res._ended).to.equal(true);
-     
-
-    // add TIMMI
-    // var req2 = new stubs.request('/classes/messages', 'POST', stubMsg2);
-    // var res2 = new stubs.response();
-
-    // handler.requestHandler(req2, res2);
-
-    // expect(res2._responseCode).to.equal(201);
-
-    //   // Now if we request the log for that room the message we posted should be there:
-    // req2 = new stubs.request('/classes/messages', 'GET');
-    // res2 = new stubs.response();
-
-    // handler.requestHandler(req2, res2);
-
-    // expect(res2._responseCode).to.equal(200);
-    // var messages = JSON.parse(res1._data).results;
-    // expect(messages.length).to.be.above(0);
-    // expect(messages[1].username).to.equal('TIMMI');
-    // expect(messages[1].message).to.equal('NEVER!');
-    // expect(res2._ended).to.equal(true);
   });
 
 });
