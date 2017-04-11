@@ -42,13 +42,13 @@ var app = {
     $.ajax({
       url: app.server,
       type: 'POST',
-      data: message,
+      data: JSON.stringify(message),
       success: function (data) {
         // Clear messages input
         app.$message.val('');
-
+        console.log('Sending something');
         // Trigger a fetch to update the messages, pass true to animate
-        app.fetch();
+        app.fetch(true);
       },
       error: function (error) {
         console.error('chatterbox: Failed to send message', error);
@@ -63,11 +63,13 @@ var app = {
       data: { order: '-createdAt' },
       contentType: 'application/json',
       success: function(data) {
+        console.log('YAY!');
         // Don't bother if we have nothing to work with
         if (!data.results || !data.results.length) { return; }
 
         // Store messages for caching later
         app.messages = data.results;
+        console.log(data.results);
 
         // Get the last message
         var mostRecentMessage = data.results[data.results.length - 1];
@@ -212,7 +214,22 @@ var app = {
   },
 
   handleSubmit: function(event) {
+    var helper = {
+      hash: function (str) {
+        var hash = 0;
+        if (str.length === 0) {
+          return hash;
+        }
+        for (var i = 0; i < str.length; i++) {
+          char = str.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash;
+        }
+        return hash;
+      }
+    };
     var message = {
+      objectId: helper.hash(app.$message.val()),
       username: app.username,
       text: app.$message.val(),
       roomname: app.roomname || 'lobby'

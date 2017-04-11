@@ -28,7 +28,12 @@ var defaultCorsHeaders = {
   'access-control-max-age': 10 // Seconds.
 };
 
-var serverData = [];
+var serverData = [{
+  objectId: 'SDGNOA',
+  username: 'tim',
+  text: 'Hi, Im Tim',
+  roomname: 'hackreactor'
+}];
 var fs = require('fs');
 var qs = require('querystring');
 var url = require('url');
@@ -57,18 +62,25 @@ var requestHandler = function(request, response) {
   // The outgoing status.
   var statusCode;
   var body;
+  // See the note below about CORS headers.
+  var headers = defaultCorsHeaders;
   
-  if (request.url !== '/classes/messages') {
+  if (pathName !== '/classes/messages') {
     statusCode = 404;
+  } else if (request.method === 'OPTIONS') {
+    statusCode = 200;
+    headers['OPTIONS'] = 'Allow'; 
   } else if (request.method === 'GET') {
     statusCode = 200;
-    console.log('------------> in GET statement');
+    console.log('In GET block');
+    console.log(serverData);
   } else if (request.method === 'POST') {
     statusCode = 201;
     body = '';
     request.on('data', function(data) {
       body += data;
       serverData.push(JSON.parse(body));
+      console.log(serverData);
     });
     request.on('end', function() {
       body = JSON.stringify({results: serverData});
@@ -76,8 +88,6 @@ var requestHandler = function(request, response) {
     });
   }
 
-  // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
 
   // Tell the client we are sending them plain text.
   //
